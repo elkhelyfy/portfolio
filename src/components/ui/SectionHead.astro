@@ -1,0 +1,57 @@
+---
+/** "01 ── About ────" then a big headline, then an optional intro. */
+interface Props {
+  index: string;
+  label: string;
+  headline: string;
+  intro?: string;
+  /** heading id, for aria-labelledby on the section */
+  id: string;
+  size?: 'm' | 's';
+}
+
+const { index, label, headline, intro, id, size = 'm' } = Astro.props;
+---
+
+<header class="head">
+  <p class="label head__label" data-reveal>
+    <span>{index}</span>
+    <span>{label}</span>
+    <span class="head__rule" aria-hidden="true"></span>
+  </p>
+  <h2 id={id} class:list={[size === 'm' ? 'display-m' : 'display-s', 'head__title']} data-split>{headline}</h2>
+  {
+    intro && (
+      <p class="lede head__intro" data-reveal>
+        {intro}
+      </p>
+    )
+  }
+  <slot />
+</header>
+
+<style>
+  .head {
+    margin-bottom: clamp(56px, 7vw, 96px);
+  }
+  .head__label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .head__rule {
+    flex: 1;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.5;
+  }
+  .head__title {
+    margin-top: clamp(28px, 3.5vw, 44px);
+    max-width: 14em;
+  }
+  .head__intro {
+    margin-top: 28px;
+    max-width: 38ch;
+    color: color-mix(in srgb, currentColor 86%, transparent);
+  }
+</style>

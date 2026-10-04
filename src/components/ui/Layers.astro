@@ -1,0 +1,78 @@
+---
+import type { Layer } from '../../data/projects';
+
+/** A simplified architecture: one row per tier, client on top, infrastructure at the bottom. */
+interface Props {
+  layers: Layer[];
+  title?: string;
+}
+const { layers, title = 'architecture, simplified' } = Astro.props;
+---
+
+<figure class="layers" data-layers>
+  <figcaption class="label">{title}</figcaption>
+  <ol>
+    {
+      layers.map((l) => (
+        <li>
+          <span class="tier">{l.tier}</span>
+          <span class="parts">
+            {l.parts.map((p) => (
+              <span class="part">{p}</span>
+            ))}
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+</figure>
+
+<style>
+  .layers figcaption {
+    font-weight: 400;
+    opacity: 0.75;
+    margin-bottom: 10px;
+  }
+  ol {
+    position: relative;
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+  /* the spine that joins the tiers */
+  ol::before {
+    content: '';
+    position: absolute;
+    left: calc(8ch + 5px);
+    top: 10px;
+    bottom: 10px;
+    border-left: 1px dashed currentColor;
+    transform-origin: top;
+    /* motion.ts draws the spine by animating --spine from 0 to 1 */
+    transform: scaleY(var(--spine, 1));
+  }
+  li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 8ch minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+  }
+  .tier {
+    font: 400 11px/1 var(--font-mono);
+    text-align: right;
+    opacity: 0.75;
+  }
+  .parts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .part {
+    font: 400 18px/1 var(--font-pixel);
+    padding: 3px 6px 2px;
+    border: 1px solid currentColor;
+    background: color-mix(in srgb, var(--paper) 70%, transparent);
+  }
+</style>

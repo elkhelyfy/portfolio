@@ -1,0 +1,257 @@
+---
+import Window from '../ui/Window.astro';
+import PunchCard from '../ui/PunchCard.astro';
+import { hero } from '../../data/hero';
+
+const today = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date());
+---
+
+<section id="top" class="hero" aria-labelledby="hero-title">
+  <!-- the outer wrapper holds each card's resting pose; motion.ts animates the inner one -->
+  <div class="deck" aria-hidden="true">
+    <div class="deck__card deck__card--back">
+      <div data-hero-in data-deck="back"><PunchCard text={hero.backCard.text} tone="blue" /></div>
+    </div>
+    <div class="deck__card deck__card--front">
+      <div data-hero-in data-deck="front"><PunchCard text={hero.card.text} live /></div>
+    </div>
+  </div>
+  <p class="caption label" data-hero-in>↑ {hero.card.caption}</p>
+
+  <div class="dialogs">
+    {
+      hero.dialogs.map((d) => (
+        <Window
+          title={d.dated ? `${today} ▪ ${d.title}` : d.title}
+          class="dialog"
+          data-hero-in
+          data-dialog
+          data-dated={d.dated ? d.title : undefined}
+        >
+          {d.heading && (
+            <p class="dialog__head" data-scramble>
+              {d.heading}
+            </p>
+          )}
+          {d.lines.map((l) => (
+            <p>{l}</p>
+          ))}
+          {d.action &&
+            (d.action.style === 'button' ? (
+              <a class="win__btn dialog__btn" href={d.action.href}>
+                {d.action.label}
+              </a>
+            ) : (
+              <a class="dialog__link" href={d.action.href}>
+                {d.action.label}
+              </a>
+            ))}
+        </Window>
+      ))
+    }
+  </div>
+
+  <div class="wrap intro">
+    <p class="intro__line" data-hero-in>
+      <span>{hero.intro[0]}</span>
+      <span class="leader" aria-hidden="true"></span>
+      <span>{hero.intro[1]}</span>
+    </p>
+    <h1 id="hero-title" class="display-xl" data-hero-in data-hero-title>{hero.headline}</h1>
+    <a class="big-link display-m cta" href={hero.cta.href} data-hero-in>{hero.cta.label}</a>
+  </div>
+
+  <p class="strip mono" aria-hidden="true">{btoa(hero.strip.repeat(3))}</p>
+</section>
+
+<script>
+  // keep dated title bars honest without a rebuild
+  const fmt = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  document.querySelectorAll<HTMLElement>('[data-dated]').forEach((win) => {
+    const title = win.querySelector('.win__title');
+    if (title) title.textContent = `${fmt.format(new Date())} ▪ ${win.dataset.dated}`;
+  });
+</script>
+
+<style>
+  .hero {
+    /* a real card is 7⅜ × 3¼ inches */
+    --card-w: min(1400px, 96vw);
+    --card-h: calc(var(--card-w) * 0.4407);
+    --deck-top: calc(var(--bar-h) + 40px);
+    /* extra room below so the shadow isn't cut off */
+    --deck-h: calc(var(--deck-top) + var(--card-h) + 80px);
+    position: relative;
+    padding-bottom: clamp(96px, 12vw, 180px);
+    overflow: clip;
+  }
+
+  /* two punched cards lying on the desk, the blue one underneath */
+  .deck {
+    position: absolute;
+    inset: 0 0 auto;
+    height: var(--deck-h);
+    overflow: hidden;
+  }
+  .deck__card {
+    position: absolute;
+    left: 50%;
+    top: var(--deck-top);
+    width: var(--card-w);
+  }
+  .deck__card--back {
+    translate: -46% -14px;
+    rotate: 2.6deg;
+  }
+  .deck__card--front {
+    translate: -50% 0;
+    rotate: -1.2deg;
+  }
+  /* soft shadow under the bottom edge, as if lying on the desk. It hangs off the
+     animated element so it drops in with the card, and as a box-shadow it is painted
+     once instead of re-filtered on every frame of the drop */
+  .deck [data-deck] {
+    position: relative;
+    isolation: isolate;
+  }
+  .deck [data-deck]::before {
+    content: '';
+    position: absolute;
+    inset: 40% 0 0;
+    z-index: -1;
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--ink) 14%, transparent),
+      0 8px 12px -6px color-mix(in srgb, var(--ink) 16%, transparent),
+      0 22px 30px -14px color-mix(in srgb, var(--ink) 22%, transparent);
+  }
+  /* the top card sits a little higher, so its shadow reaches further */
+  .deck [data-deck='front']::before {
+    box-shadow:
+      0 1px 2px color-mix(in srgb, var(--ink) 18%, transparent),
+      0 12px 16px -6px color-mix(in srgb, var(--ink) 20%, transparent),
+      0 34px 44px -18px color-mix(in srgb, var(--ink) 30%, transparent);
+  }
+  /* quieter printed digits, so the holes and the lettering lead */
+  .deck :global(.pc-print text) {
+    fill-opacity: 0.55;
+  }
+  .caption {
+    position: absolute;
+    top: calc(var(--deck-top) + var(--card-h) + 22px);
+    right: var(--gutter);
+    z-index: 1;
+    font-weight: 400;
+    color: var(--ink-2);
+  }
+
+  .dialogs {
+    position: relative;
+    /* centred on the cards, not on the shadow room below them */
+    min-height: calc(var(--deck-top) + var(--card-h) + 40px);
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 22px;
+    padding: calc(var(--bar-h) + 24px) 16px 0;
+  }
+  .dialog {
+    width: min(372px, 100%);
+    text-align: center;
+  }
+  .dialog :global(.win__body) {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 12px 14px;
+  }
+  .dialog__head {
+    text-transform: uppercase;
+    min-height: 1.05em;
+  }
+  .dialog__btn {
+    margin-top: 12px;
+  }
+  .dialog__link {
+    margin-top: 10px;
+    text-underline-offset: 3px;
+  }
+
+  .intro {
+    position: relative;
+    text-align: center;
+  }
+  .intro__line {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    margin-top: 72px;
+    font-size: 18px;
+  }
+  .leader {
+    width: clamp(48px, 7vw, 96px);
+    height: 2px;
+    background: radial-gradient(circle, currentColor 0.9px, transparent 1.1px) 0 0 / 4px 2px repeat-x;
+  }
+  h1 {
+    margin: 56px auto 0;
+    max-width: 7.6em;
+    /* SplitText measures lines itself; balance would fight it */
+    text-wrap: wrap;
+  }
+  .cta {
+    margin-top: clamp(56px, 7vw, 96px);
+  }
+
+  .strip {
+    position: absolute;
+    left: max(10px, calc(50% - 560px));
+    top: calc(var(--deck-h) + 120px);
+    height: 900px;
+    overflow: hidden;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+    user-select: none;
+  }
+  @media (max-width: 1100px) {
+    .strip {
+      display: none;
+    }
+  }
+  @media (max-width: 760px) {
+    /* too narrow for a whole card: show the start of it, where the name is punched */
+    .hero {
+      --card-w: 900px;
+    }
+    .deck__card {
+      left: 0;
+    }
+    .deck__card--back {
+      translate: -2% -12px;
+    }
+    .deck__card--front {
+      translate: -5% 0;
+    }
+    .caption {
+      left: var(--gutter);
+      right: auto;
+    }
+  }
+  @media (max-width: 600px) {
+    .intro__line {
+      flex-direction: column;
+      align-items: center;
+    }
+    .leader {
+      display: none;
+    }
+    h1 {
+      max-width: none;
+    }
+  }
+</style>

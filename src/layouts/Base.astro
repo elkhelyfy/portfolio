@@ -1,0 +1,80 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { profile } from '../data/profile';
+import { experience } from '../data/experience';
+
+interface Props {
+  /** page title; the site name is appended */
+  title?: string;
+  description?: string;
+  /** Open Graph image path in public/ */
+  image?: string;
+}
+
+const { title, description = profile.description, image = '/og.png' } = Astro.props;
+const pageTitle = title ? `${title} — ${profile.name}` : `${profile.name} — ${profile.role}`;
+const site = Astro.site ?? new URL('https://example.com');
+const canonical = new URL(Astro.url.pathname, site);
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: profile.role,
+  email: `mailto:${profile.email}`,
+  url: site.href,
+  address: { '@type': 'PostalAddress', addressLocality: 'Casablanca', addressCountry: 'MA' },
+  knowsLanguage: ['ar', 'fr', 'en'],
+  worksFor: { '@type': 'Organization', name: experience.company },
+  sameAs: [profile.linkedin],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#f5f1e8" />
+    <meta name="generator" content={Astro.generator} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={new URL(image, site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Font cssVariable="--font-sans" preload={[{ weight: 500 }]} />
+    <Font cssVariable="--font-pixel" preload />
+    <Font cssVariable="--font-mono" />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(person)} />
+    <script is:inline>
+      // before first paint: let motion.ts hide what it is about to animate in
+      // (it runs in both its full and gentle modes). If the script never arrives, show everything after 4s.
+      document.documentElement.classList.add('js-motion');
+      setTimeout(() => document.documentElement.classList.remove('js-motion'), 4000);
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import '../scripts/motion';
+    </script>
+  </body>
+</html>

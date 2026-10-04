@@ -1,0 +1,78 @@
+---
+import Base from '../layouts/Base.astro';
+import { art } from '../data/art';
+---
+
+<Base title="Image Credits" description="Sources and licences for the images on this site.">
+  <section class="wrap page">
+    <h1 class="display-l">Image Credits</h1>
+    <p class="lede intro">
+      Every picture here is public domain or CC0, from Wikimedia Commons. They are recoloured, cropped and dithered by
+      a small build script; the originals are linked below.
+    </p>
+    <ul class="list">
+      {
+        Object.values(art).map((a) => (
+          <li>
+            <span class="chip">{a.license}</span>
+            <p>
+              <a href={a.page} target="_blank" rel="noopener">
+                {a.caption}
+              </a>
+            </p>
+            <p class="by">
+              {a.author}, {a.date}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="label fonts">
+      Type: Inter Tight, VT323 and JetBrains Mono, all under the SIL Open Font License.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .page {
+    padding: calc(var(--nav-h) + clamp(56px, 8vw, 110px)) 0 clamp(80px, 9vw, 130px);
+  }
+  .intro {
+    margin-top: 28px;
+    max-width: 44ch;
+  }
+  .list {
+    list-style: none;
+    padding: 0;
+    margin-top: 56px;
+    border-top: 1px solid var(--ink);
+  }
+  .list li {
+    display: grid;
+    grid-template-columns: 12ch minmax(0, 1fr) minmax(0, 0.8fr);
+    gap: 20px;
+    align-items: baseline;
+    padding: 14px 0 12px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .list .chip {
+    justify-self: start;
+  }
+  .list a {
+    text-underline-offset: 3px;
+  }
+  .by {
+    font-size: 16px;
+    color: color-mix(in srgb, var(--ink) 70%, var(--paper));
+  }
+  .fonts {
+    margin-top: 40px;
+    font-weight: 400;
+  }
+  @media (max-width: 760px) {
+    .list li {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+  }
+</style>

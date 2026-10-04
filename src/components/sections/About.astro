@@ -1,0 +1,190 @@
+---
+import SectionHead from '../ui/SectionHead.astro';
+import Window from '../ui/Window.astro';
+import { about } from '../../data/about';
+---
+
+<section id="about" class="band about" aria-labelledby="about-title">
+  <div class="wrap">
+    <SectionHead index="01" label={about.label} headline={about.statement} id="about-title" size="s" />
+
+    <div class="grid">
+      <div class="bio" data-reveal>
+        {about.bio.map((p) => <p class="lede">{p}</p>)}
+      </div>
+
+      <div class="whoami-wrap dots" data-reveal>
+        <Window title="whoami" tone="white" class="whoami">
+          <p class="whoami__cmd">$ whoami</p>
+          <dl class="whoami__list">
+            {
+              about.whoami.map(([k, v]) => (
+                <div>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              ))
+            }
+          </dl>
+          <p class="whoami__cmd">$ <span class="cursor" aria-hidden="true"></span></p>
+        </Window>
+      </div>
+    </div>
+
+    <ol class="path" data-stagger>
+      {
+        about.path.map((step, i) => (
+          <li class:list={['path__step', i === about.path.length - 1 && 'is-now']}>
+            <Window title={step.step} class="path__win">
+              <p class="path__title">{step.title}</p>
+              <p class="path__where">{step.where}</p>
+            </Window>
+          </li>
+        ))
+      }
+    </ol>
+
+    <ul class="principles" data-stagger>
+      {
+        about.principles.map((p) => (
+          <li class="col">
+            <span class="label">{p.title}</span>
+            <p>{p.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .about {
+    padding-top: clamp(40px, 6vw, 80px);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+  .bio {
+    display: grid;
+    gap: 22px;
+    max-width: 36ch;
+  }
+  .whoami-wrap {
+    padding: clamp(24px, 4vw, 48px);
+    color: var(--ink);
+  }
+  .whoami {
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .whoami__cmd {
+    color: var(--blue);
+  }
+  .whoami__list {
+    display: grid;
+    gap: 2px;
+    margin: 8px 0;
+  }
+  .whoami__list div {
+    display: grid;
+    grid-template-columns: 9ch 1fr;
+    gap: 8px;
+  }
+  .whoami__list dt {
+    color: var(--ink-2);
+  }
+  .cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 0.9em;
+    vertical-align: -0.1em;
+    background: var(--ink);
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cursor {
+      animation: none;
+    }
+  }
+
+  /* how I got here: four windows joined by a dashed line */
+  .path {
+    position: relative;
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: clamp(80px, 9vw, 130px);
+  }
+  .path::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 12px;
+    border-top: 1px dashed var(--ink);
+  }
+  .path__step {
+    position: relative;
+  }
+  .path__win {
+    height: 100%;
+  }
+  .is-now .path__win {
+    --win-bg: var(--blue-light);
+  }
+  .path__title {
+    font-size: 23px;
+  }
+  .path__where {
+    margin-top: 10px;
+    color: var(--ink-2);
+  }
+
+  .principles {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: clamp(64px, 7vw, 96px);
+  }
+  .principles .label {
+    display: block;
+    margin-bottom: 36px;
+  }
+  .principles p {
+    font-size: 17px;
+    line-height: 1.2;
+  }
+
+  @media (max-width: 960px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .path,
+    .principles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .path::before {
+      display: none;
+    }
+  }
+  @media (max-width: 520px) {
+    .path,
+    .principles {
+      grid-template-columns: 1fr;
+    }
+    .principles .label {
+      margin-bottom: 14px;
+    }
+  }
+</style>

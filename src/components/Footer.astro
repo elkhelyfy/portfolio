@@ -1,0 +1,214 @@
+---
+import Logo from './Logo.astro';
+import { footer } from '../data/footer';
+import { profile } from '../data/profile';
+
+const year = new Date().getFullYear();
+const motto = btoa(footer.motto);
+const faces = ['front', 'back', 'left', 'right', 'top', 'bottom'];
+---
+
+<footer class="footer band--dark">
+  <div class="stage crop">
+    <div class="scene" aria-hidden="true">
+      <div class="rig">
+        {
+          [0, 1, 2].map((i) => (
+            <div class="slab" style={`--i:${i}`}>
+              {faces.map((f) => (
+                <span class={`face face--${f}`} />
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+    <p class="wordmark" data-wordmark>
+      <Logo class="wordmark__logo" size={112} />
+      <span>{footer.wordmark}</span>
+    </p>
+    <p class="b64 mono" aria-hidden="true">{motto}</p>
+  </div>
+
+  <div class="row">
+    <p>{profile.name} © {year}</p>
+    <nav class="row__mid" aria-label="Footer">
+      {
+        footer.links.map((l) => (
+          <a href={l.href} target={l.external ? '_blank' : undefined} rel={l.external ? 'noopener' : undefined}>
+            {l.label}
+          </a>
+        ))
+      }
+    </nav>
+    <div class="row__end">
+      {
+        footer.social.map((l) => (
+          <a href={l.href} target={l.external ? '_blank' : undefined} rel={l.external ? 'noopener' : undefined}>
+            {l.label}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    padding: 72px 0 0;
+    overflow: hidden;
+    /* covers the sub-pixel seam against the dark FAQ above */
+    box-shadow: 0 -2px 0 var(--ink);
+  }
+  .stage {
+    position: relative;
+    margin-inline: 36px;
+    height: clamp(420px, 44vw, 610px);
+    display: grid;
+    place-items: center;
+    color: var(--paper);
+  }
+
+  /* three wireframe slabs, slowly turning */
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    perspective: 1100px;
+  }
+  .rig {
+    --w: clamp(200px, 26vw, 360px);
+    --h: calc(var(--w) * 0.2);
+    position: relative;
+    width: var(--w);
+    height: var(--w);
+    transform-style: preserve-3d;
+    transform: rotateX(-26deg) rotateY(38deg);
+    animation: turn 48s linear infinite;
+  }
+  .slab {
+    position: absolute;
+    left: 0;
+    top: calc(50% - var(--h) * 2.2 + var(--i) * var(--h) * 1.6);
+    width: var(--w);
+    height: var(--h);
+    transform-style: preserve-3d;
+  }
+  .face {
+    position: absolute;
+    border: 1px solid color-mix(in srgb, var(--paper) 62%, transparent);
+  }
+  .face--front,
+  .face--back {
+    width: var(--w);
+    height: var(--h);
+  }
+  .face--front {
+    transform: translateZ(calc(var(--w) / 2));
+  }
+  .face--back {
+    transform: rotateY(180deg) translateZ(calc(var(--w) / 2));
+  }
+  .face--left,
+  .face--right {
+    width: var(--w);
+    height: var(--h);
+  }
+  .face--left {
+    transform: rotateY(-90deg) translateZ(calc(var(--w) / 2));
+  }
+  .face--right {
+    transform: rotateY(90deg) translateZ(calc(var(--w) / 2));
+  }
+  .face--top,
+  .face--bottom {
+    width: var(--w);
+    height: var(--w);
+    top: calc(var(--h) / 2 - var(--w) / 2);
+  }
+  .face--top {
+    transform: rotateX(90deg) translateZ(calc(var(--h) / 2));
+  }
+  .face--bottom {
+    transform: rotateX(-90deg) translateZ(calc(var(--h) / 2));
+  }
+  @keyframes turn {
+    to {
+      transform: rotateX(-26deg) rotateY(398deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rig {
+      animation: none;
+    }
+  }
+
+  .wordmark {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 2vw, 28px);
+    font-size: clamp(3.25rem, 9.6vw, 8.5rem);
+    line-height: 0.9;
+    letter-spacing: -0.055em;
+    white-space: nowrap;
+  }
+  .wordmark__logo {
+    width: 0.78em;
+    height: auto;
+    flex: none;
+  }
+  .b64 {
+    position: absolute;
+    bottom: 14px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0.85;
+    overflow-wrap: anywhere;
+    padding-inline: 24px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: baseline;
+    padding: 36px 36px 20px;
+    font-size: 18px;
+  }
+  .row a {
+    text-decoration: none;
+  }
+  .row__mid,
+  .row__end {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .row__end {
+    justify-content: flex-end;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .row a:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+  @media (max-width: 860px) {
+    .stage {
+      margin-inline: 16px;
+    }
+    .row {
+      grid-template-columns: 1fr;
+      padding-inline: 16px;
+    }
+    .row__end {
+      justify-content: flex-start;
+    }
+  }
+</style>

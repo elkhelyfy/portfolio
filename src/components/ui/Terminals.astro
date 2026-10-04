@@ -1,0 +1,105 @@
+---
+import Window from './Window.astro';
+import type { Terminal } from '../../data/demos';
+
+/** Side-by-side terminals; motion.ts prints them line by line when they scroll into view. */
+interface Props {
+  terminals: Terminal[];
+}
+const { terminals } = Astro.props;
+---
+
+<div class="terms dots">
+  {
+    terminals.map((w) => (
+      <Window title={w.title} tone={w.tone} class="term">
+        <ol class="lines" data-terminal>
+          {w.lines.map((l) => (
+            <li class={l.k}>{l.t || ' '}</li>
+          ))}
+        </ol>
+      </Window>
+    ))
+  }
+</div>
+
+<style>
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(20px, 3vw, 40px);
+    padding: clamp(28px, 5vw, 64px) clamp(16px, 4vw, 56px);
+    border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  }
+  .term {
+    min-width: 0;
+  }
+  .term :global(.win__body) {
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+  .lines {
+    list-style: none;
+    padding: 6px 8px 10px 0;
+    font: 400 12px/1.5 var(--font-mono);
+    font-variant-ligatures: none;
+    overflow-x: auto;
+    min-height: 400px;
+  }
+  .lines li {
+    position: relative;
+    padding-left: 30px;
+    white-space: pre;
+  }
+  /* a checkbox per line, filled once the line has printed */
+  .lines li::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+  }
+  .lines:global(.is-waiting) li {
+    visibility: hidden;
+  }
+  .lines:global(.is-waiting) li::before {
+    visibility: visible;
+    background: transparent;
+  }
+  .lines:global(.is-waiting) li:global(.is-shown) {
+    visibility: visible;
+  }
+  .lines:global(.is-waiting) li:global(.is-shown)::before {
+    background: var(--ink);
+  }
+  .cmd {
+    font-weight: 700;
+  }
+  .dim {
+    opacity: 0.6;
+  }
+  .ok {
+    color: var(--mint);
+    font-weight: 700;
+  }
+  .err {
+    color: var(--clay);
+    font-weight: 700;
+  }
+  .head {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  @media (max-width: 860px) {
+    .terms {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .lines {
+      min-height: 0;
+    }
+  }
+</style>

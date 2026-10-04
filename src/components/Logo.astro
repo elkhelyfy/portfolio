@@ -1,0 +1,29 @@
+---
+/** Isometric stack of three slabs: a server rack, or a database, depending on who's asking. */
+interface Props {
+  size?: number;
+  class?: string;
+  title?: string;
+}
+const { size = 48, class: className, title } = Astro.props;
+---
+
+<svg
+  class={className}
+  width={size}
+  height={size * (46 / 48)}
+  viewBox="0 0 48 46"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2.6"
+  stroke-linejoin="round"
+  stroke-linecap="round"
+  role={title ? 'img' : undefined}
+  aria-hidden={title ? undefined : 'true'}
+>
+  {title && <title>{title}</title>}
+  <path d="M8 10 24 2l16 8-16 8Z" />
+  <path d="M8 10v5l16 8 16-8v-5M24 18v5" />
+  <path d="M8 20l16 8 16-8M8 20v5l16 8 16-8v-5M24 28v5" />
+  <path d="M8 30l16 8 16-8M8 30v5l16 8 16-8v-5M24 38v5" />
+</svg>

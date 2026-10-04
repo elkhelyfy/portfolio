@@ -1,0 +1,34 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+/**
+ * A 1984-style window: black title bar, grey body inside a second hairline.
+ * Pass `aside` for text on the right of the title bar.
+ */
+interface Props extends HTMLAttributes<'div'> {
+  title: string;
+  aside?: string;
+  tone?: 'grey' | 'white' | 'dim';
+  /** heading level for the title, if it should be one */
+  as?: 'h1' | 'h2' | 'h3' | 'p';
+}
+
+const { title, aside, tone = 'grey', as: Title = 'p', class: className, ...rest } = Astro.props;
+---
+
+<div class:list={['win', tone !== 'grey' && `win--${tone}`, className]} {...rest}>
+  <div class="win__bar" data-handle>
+    <Title class="win__title">{title}</Title>
+    {aside && <span>{aside}</span>}
+  </div>
+  <div class="win__body">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .win__title {
+    font: inherit;
+    letter-spacing: inherit;
+  }
+</style>

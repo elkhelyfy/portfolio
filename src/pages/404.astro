@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import Window from '../components/ui/Window.astro';
+import PunchCard from '../components/ui/PunchCard.astro';
+---
+
+<Base title="Not Found">
+  <section class="page">
+    <div class="deck" aria-hidden="true">
+      <PunchCard text="404 PAGE NOT FOUND - SELECT * FROM PAGES WHERE PATH = ? - 0 ROWS" />
+    </div>
+    <Window title="404 ▪ Not Found" class="dialog" as="h1">
+      <p>SELECT * FROM pages WHERE path = ?</p>
+      <p>0 rows returned</p>
+      <a class="win__btn" href="/">Back to the home page</a>
+    </Window>
+  </section>
+</Base>
+
+<style>
+  .page {
+    position: relative;
+    min-height: 80dvh;
+    display: grid;
+    place-items: center;
+    padding: 120px 16px;
+    overflow: clip;
+  }
+  .deck {
+    position: absolute;
+    inset: 0;
+    mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  }
+  .deck :global(svg) {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    width: max(1400px, 110vw);
+    translate: -50% 0;
+    rotate: -2deg;
+  }
+  .dialog {
+    position: relative;
+    width: min(380px, 100%);
+    text-align: center;
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .dialog :global(.win__body) {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 16px;
+  }
+  .dialog .win__btn {
+    margin-top: 14px;
+  }
+</style>

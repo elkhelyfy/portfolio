@@ -1,0 +1,204 @@
+---
+import SectionHead from '../ui/SectionHead.astro';
+import { skills } from '../../data/skills';
+import { projects } from '../../data/projects';
+
+// columns: every project, work first, in the order of projects.ts
+const columns = projects.map((p) => ({ slug: p.slug, name: p.name }));
+---
+
+<section id="skills" class="band band--card skills" aria-labelledby="skills-title">
+  <div class="wrap">
+    <SectionHead index="03" label={skills.label} headline={skills.headline} intro={skills.intro} id="skills-title" />
+
+    <ul class="core" data-stagger aria-label="Core skills">
+      {skills.core.map((s) => <li>{s}</li>)}
+    </ul>
+
+    <div class="grid">
+      <figure class="matrix" data-reveal>
+        <div class="matrix__card">
+          <table data-matrix>
+            <caption class="sr-only">Skills used in each project</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="matrix__corner">{skills.matrix.title}</th>
+                {
+                  columns.map((c) => (
+                    <th scope="col">
+                      <a href={`/projects/${c.slug}`}>{c.name}</a>
+                    </th>
+                  ))
+                }
+              </tr>
+            </thead>
+            <tbody>
+              {
+                skills.matrix.rows.map((row, r) => (
+                  <tr>
+                    <th scope="row">{row.skill}</th>
+                    {columns.map((c, i) => {
+                      const used = row.in.includes(c.slug);
+                      return (
+                        <td class={used ? 'is-used' : undefined}>
+                          {used ? (
+                            <span class="hole">
+                              <span class="sr-only">used</span>
+                            </span>
+                          ) : (
+                            <span class="print" aria-hidden="true">
+                              {(r + i) % 10}
+                            </span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <figcaption class="label">One column per project, a hole where the skill shipped.</figcaption>
+      </figure>
+
+      <ul class="groups" data-stagger>
+        {
+          skills.groups.map((g) => (
+            <li class="col">
+              <h3 class="label">{g.name}</h3>
+              <ul class="tags">
+                {g.items.map((s) => (
+                  <li>{s}</li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .core {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.32em;
+    font-size: clamp(2.2rem, 5.4vw, 4.6rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    margin-bottom: clamp(56px, 7vw, 96px);
+  }
+  .core li:not(:last-child)::after {
+    content: '/';
+    margin-left: 0.32em;
+    color: var(--card-print);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    gap: clamp(32px, 5vw, 72px);
+    align-items: start;
+  }
+
+  /* a white card with the top-left corner cut, like the cards in the hero */
+  .matrix__card {
+    background: #fbf9f4;
+    padding: 18px 20px 16px 14px;
+    clip-path: polygon(26px 0, 100% 0, 100% 100%, 0 100%, 0 26px);
+    filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--ink) 30%, transparent));
+    overflow-x: auto;
+  }
+  table {
+    border-collapse: collapse;
+    font: 400 19px/1 var(--font-pixel);
+  }
+  thead th {
+    height: 128px;
+    vertical-align: bottom;
+    padding: 0 0 8px;
+  }
+  thead th a {
+    display: inline-block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    thead th a:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+  }
+  .matrix__corner {
+    text-align: left;
+    vertical-align: bottom;
+    color: var(--blue);
+    padding-right: 12px;
+  }
+  tbody th {
+    text-align: right;
+    font-weight: 400;
+    white-space: nowrap;
+    padding: 0 12px 0 0;
+  }
+  td {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    vertical-align: middle;
+    border-left: 1px dotted color-mix(in srgb, var(--ink) 18%, transparent);
+  }
+  tbody tr:nth-child(even) td,
+  tbody tr:nth-child(even) th {
+    background: color-mix(in srgb, var(--card) 35%, transparent);
+  }
+  .hole {
+    display: inline-block;
+    width: 11px;
+    height: 22px;
+    border-radius: 1.5px;
+    background: var(--ink);
+    vertical-align: middle;
+  }
+  .print {
+    font: 400 12px var(--font-mono);
+    color: var(--card-print);
+    opacity: 0.6;
+  }
+  .matrix figcaption {
+    margin-top: 12px;
+    font-weight: 400;
+  }
+
+  .groups {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 36px 24px;
+  }
+  .groups .label {
+    margin-bottom: 14px;
+    font-size: 11px;
+  }
+  .groups .tags li {
+    background: color-mix(in srgb, var(--ink) 9%, transparent);
+  }
+
+  @media (max-width: 1100px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .groups {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

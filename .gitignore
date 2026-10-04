@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# browser automation scratch
+.playwright-mcp/
+
+# downloaded image sources (scripts/images.mjs)
+.cache/

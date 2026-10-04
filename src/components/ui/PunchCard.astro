@@ -1,0 +1,119 @@
+---
+/**
+ * An 80-column IBM punched card, drawn to scale (1 inch = 200 units).
+ * The holes spell `text` in IBM 029 code; the keypunch also prints each character
+ * along the top edge, as real cards did.
+ */
+import { ROWS, encode } from '../../lib/punch';
+
+interface Props {
+  text: string;
+  tone?: 'manila' | 'blue' | 'white';
+  /** accessible description; omit for a decorative card */
+  label?: string;
+  class?: string;
+  /** hook for motion.ts to punch the holes in on load */
+  live?: boolean;
+}
+
+const { text, tone = 'manila', label, class: className, live = false } = Astro.props;
+
+const W = 1475;
+const H = 650;
+const colX = (c: number) => 50.2 + c * 17.4;
+const rowY = (r: number) => 50 + r * 50;
+
+const columns = encode(text);
+const all = Array.from({ length: 80 }, (_, c) => columns[c] ?? { char: ' ', rows: [] });
+
+// per-glyph x positions: every character in a <text> sits on its own column
+const xs = all.map((_, c) => colX(c).toFixed(1)).join(' ');
+const digitRows = ROWS.slice(2).map((row, i) => ({
+  y: rowY(i + 2) + 7,
+  glyphs: all.map((col) => (col.rows.includes(row) ? ' ' : row)).join(''),
+}));
+
+// column numbers: one or two glyphs per column, still positioned per glyph
+const numXs: string[] = [];
+let numGlyphs = '';
+for (let c = 0; c < 80; c++) {
+  const n = String(c + 1);
+  if (n.length === 1) numXs.push(colX(c).toFixed(1));
+  else numXs.push((colX(c) - 3).toFixed(1), (colX(c) + 3).toFixed(1));
+  numGlyphs += n;
+}
+
+const holes = all.flatMap((col, c) =>
+  col.rows.map((row) => ({ c, x: colX(c) - 5.5, y: rowY(ROWS.indexOf(row)) - 12.5 })),
+);
+const printed = all.map((col, c) => ({ c, char: col.char })).filter((p) => p.char.trim());
+---
+
+<svg
+  class:list={['punchcard', `punchcard--${tone}`, className]}
+  viewBox={`0 0 ${W} ${H}`}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  data-punchcard={live ? '' : undefined}
+>
+  <path class="pc-body" d={`M50 0H${W}V${H}H0V50Z`}></path>
+  <g class="pc-print">
+    {digitRows.map((r) => <text x={xs} y={r.y}>{r.glyphs}</text>)}
+    <text class="pc-num" x={numXs.join(' ')} y={rowY(2) + 30}>{numGlyphs}</text>
+    <text class="pc-num" x={numXs.join(' ')} y={H - 14}>{numGlyphs}</text>
+  </g>
+  <g class="pc-chars">
+    {
+      printed.map((p) => (
+        <text x={colX(p.c)} y="30" data-col={p.c}>
+          {p.char}
+        </text>
+      ))
+    }
+  </g>
+  <g class="pc-holes">
+    {holes.map((h) => <rect x={h.x} y={h.y} width="11" height="25" rx="1.5" data-col={h.c} />)}
+  </g>
+</svg>
+
+<style>
+  .punchcard {
+    --body: var(--card);
+    --print: var(--card-print);
+    --char: var(--ink);
+    --hole: var(--ink);
+    display: block;
+    overflow: visible;
+  }
+  .punchcard--blue {
+    --body: var(--blue);
+    --print: color-mix(in srgb, var(--blue-light) 70%, var(--blue));
+    --char: var(--paper);
+  }
+  .punchcard--white {
+    --body: #fbf9f4;
+    --print: color-mix(in srgb, var(--ink) 35%, #fbf9f4);
+  }
+  .pc-body {
+    fill: var(--body);
+    stroke: color-mix(in srgb, var(--ink) 30%, transparent);
+    stroke-width: 1.5;
+  }
+  .pc-print text {
+    fill: var(--print);
+    font: 400 19px var(--font-mono);
+    text-anchor: middle;
+  }
+  .pc-print .pc-num {
+    font-size: 9px;
+  }
+  .pc-chars text {
+    fill: var(--char);
+    font: 400 27px var(--font-pixel);
+    text-anchor: middle;
+  }
+  .pc-holes rect {
+    fill: var(--hole);
+  }
+</style>

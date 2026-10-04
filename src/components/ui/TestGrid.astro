@@ -1,0 +1,78 @@
+---
+import Window from './Window.astro';
+
+/** One square per test; motion.ts runs the suite when it scrolls into view. */
+interface Props {
+  total: number;
+  columns: number;
+  runner: string;
+  caption: string;
+}
+const { total, columns, runner, caption } = Astro.props;
+// a fixed scatter of greys so it reads like a report, not a progress bar
+const shades = Array.from({ length: total }, (_, i) => ['s1', 's2', 's3', 's2', 's1', 's4'][(i * 7 + (i % 5) * 3) % 6]);
+---
+
+<Window title={runner} tone="white" class="suite">
+  <div data-tests={total}>
+    <p>{caption}</p>
+    <p class="count"><span data-count>{total}</span> / {total} PASS</p>
+    <div class="cells" style={`--cols: ${columns}`} aria-hidden="true">
+      {shades.map((s) => <i class={s} />)}
+    </div>
+    <div class="scale" aria-hidden="true">
+      <span>0</span>
+      <span>{total}</span>
+    </div>
+  </div>
+</Window>
+
+<style>
+  .suite {
+    max-width: 520px;
+  }
+  .count {
+    display: inline-block;
+    margin: 4px 0 10px;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: 26px;
+    padding: 1px 5px 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .cells {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    gap: 2px;
+    border: 1px solid var(--ink);
+    padding: 3px;
+  }
+  .cells i {
+    aspect-ratio: 1;
+    background: var(--ink);
+  }
+  .cells i.s2 {
+    background: #4a4740;
+  }
+  .cells i.s3 {
+    background: #6f6a60;
+  }
+  .cells i.s4 {
+    background: #2e2c28;
+  }
+  :global(.is-waiting) .cells i:not(:global(.is-run)) {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent);
+  }
+  .scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding: 2px 4px 0;
+    background: linear-gradient(to right, #fbf9f4, var(--ink));
+    color: var(--paper);
+  }
+  .scale span:first-child {
+    color: var(--ink);
+  }
+</style>

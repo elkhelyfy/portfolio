@@ -1,0 +1,359 @@
+/* ───────── tokens ───────── */
+:root {
+  --ink: #1b1a17;
+  --ink-2: #4a4740; /* secondary text on paper */
+  --paper: #f5f1e8;
+  --card: #ece0c2; /* manila punched-card stock */
+  --card-print: #8f7f5c; /* the digits printed on a card */
+  --grey: #e2ddd2; /* window body */
+  --grey-2: #c9c3b6;
+  --blue: #3e4fd6; /* Majorelle-ish cobalt */
+  --blue-ink: #2a37a6;
+  --blue-light: #b9c0f2;
+  --clay: #c4532f; /* terracotta */
+  --mint: #2f7d5b;
+
+  /* --font-sans, --font-pixel and --font-mono come from <Font> in Base.astro */
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  --gutter: clamp(16px, 6.4vw, 92px);
+  --measure: 1256px;
+  --bar-h: 36px;
+
+  color-scheme: light;
+}
+
+/* ───────── reset ───────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+* {
+  margin: 0;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--bar-h) + 24px);
+  interpolate-size: allow-keywords;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+body {
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.25;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+}
+img,
+svg,
+canvas,
+video {
+  display: block;
+  max-width: 100%;
+}
+a {
+  color: inherit;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 500;
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+::selection {
+  background: var(--blue);
+  color: var(--paper);
+}
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip-link {
+  position: fixed;
+  left: 8px;
+  top: 8px;
+  z-index: 100;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font: 20px/1 var(--font-pixel);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+/* ───────── layout ───────── */
+.wrap {
+  width: min(var(--measure), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+}
+.band {
+  position: relative;
+  padding-block: clamp(96px, 11vw, 160px);
+}
+.band--blue {
+  background: var(--blue);
+  color: var(--paper);
+}
+.band--card {
+  background: var(--card);
+}
+.band--dark {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ───────── type ───────── */
+.display-xl {
+  font-size: clamp(3.5rem, 10.6vw, 9.5rem);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+.display-l {
+  font-size: clamp(3rem, 9vw, 8rem);
+  line-height: 0.84;
+  letter-spacing: -0.05em;
+}
+.display-m {
+  font-size: clamp(2.4rem, 5.6vw, 5rem);
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+}
+.display-s {
+  font-size: clamp(1.75rem, 3.4vw, 3rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+}
+.lede {
+  font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+}
+.label {
+  font: 700 11px/1.3 var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.mono,
+code,
+pre {
+  font-family: var(--font-mono);
+  /* JetBrains Mono turns >= into ≥, which lies about the code */
+  font-variant-ligatures: none;
+}
+
+/* an underlined link at headline size */
+.big-link {
+  display: inline-block;
+  text-decoration: none;
+  border-bottom: 0.07em solid currentColor;
+  padding-bottom: 0.02em;
+  line-height: 0.95;
+  transition: transform 160ms var(--ease-out);
+}
+.big-link:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .big-link {
+    transition:
+      transform 160ms var(--ease-out),
+      border-color 150ms ease;
+  }
+  .big-link:hover {
+    border-bottom-color: transparent;
+  }
+}
+
+/* a small underlined text link */
+.more {
+  display: inline-block;
+  font-size: 18px;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  transition: transform 160ms var(--ease-out);
+}
+.more:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .more:hover {
+    border-bottom-style: dashed;
+  }
+}
+
+/* ───────── primitives ───────── */
+
+/* crop marks in the four corners, drawn in currentColor */
+.crop {
+  --m: 11px;
+  position: relative;
+  background:
+    linear-gradient(currentColor, currentColor) top left / var(--m) 1px,
+    linear-gradient(currentColor, currentColor) top left / 1px var(--m),
+    linear-gradient(currentColor, currentColor) top right / var(--m) 1px,
+    linear-gradient(currentColor, currentColor) top right / 1px var(--m),
+    linear-gradient(currentColor, currentColor) bottom left / var(--m) 1px,
+    linear-gradient(currentColor, currentColor) bottom left / 1px var(--m),
+    linear-gradient(currentColor, currentColor) bottom right / var(--m) 1px,
+    linear-gradient(currentColor, currentColor) bottom right / 1px var(--m);
+  background-repeat: no-repeat;
+}
+
+/* a dotted field for windows to sit on; takes the colour of the text around it */
+.dots {
+  background-image: radial-gradient(color-mix(in srgb, currentColor 30%, transparent) 0.85px, transparent 1.1px);
+  background-size: 6px 6px;
+}
+
+/* inverted pixel label, sits on the top-left of a panel */
+.tag {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  font: 22px/1 var(--font-pixel);
+  padding: 2px 5px 1px;
+}
+
+/* inverted name chip */
+.chip {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  font: 20px/1 var(--font-pixel);
+  padding: 1px 4px 0;
+  white-space: nowrap;
+}
+
+/* labelled column with a hairline on its left */
+.col {
+  border-left: 1px solid currentColor;
+  padding-left: 10px;
+}
+
+/* stack tags */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0;
+  list-style: none;
+}
+.tags li {
+  font: 18px/1 var(--font-pixel);
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  padding: 3px 5px 2px;
+}
+
+/* ───────── retro window ───────── */
+.win {
+  --win-bg: var(--grey);
+  position: relative;
+  background: var(--win-bg);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  font-family: var(--font-pixel);
+  font-size: 21px;
+  line-height: 1.05;
+}
+.win--white {
+  --win-bg: #fbf9f4;
+}
+.win--dim {
+  --win-bg: var(--grey-2);
+}
+.win__bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 2px 5px 1px;
+  font: 21px/1 var(--font-pixel);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+.win__body {
+  margin: 3px;
+  border: 1px solid var(--ink);
+  padding: 10px;
+}
+.win__btn {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--paper);
+  font: 22px/1 var(--font-pixel);
+  padding: 8px 22px 7px;
+  text-decoration: none;
+  border: 0;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out);
+}
+.win__btn:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .win__btn {
+    transition:
+      transform 160ms var(--ease-out),
+      background-color 150ms ease;
+  }
+  .win__btn:hover {
+    background: var(--blue);
+  }
+}
+
+/* ───────── motion hooks ─────────
+   motion.ts adds .js-motion to <html> before first paint (unless reduced motion is on).
+   Elements it animates in on load start hidden here, so they never flash. */
+.js-motion [data-hero-in] {
+  visibility: hidden;
+}
+/* SplitText measures lines itself; balance would fight it */
+.js-motion [data-split] {
+  text-wrap: wrap;
+}
+/* headline line-heights are tighter than the glyphs, so grow each line mask
+   a little without moving anything, or the reveal would shave off ascenders */
+.split-line-mask,
+.split-char-mask {
+  padding-block: 0.14em;
+  margin-block: -0.14em;
+}

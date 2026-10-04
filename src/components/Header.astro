@@ -1,0 +1,252 @@
+---
+import Logo from './Logo.astro';
+import { nav } from '../data/nav';
+
+const home = Astro.url.pathname === '/';
+const href = (hash: string) => (home ? hash : `/${hash}`);
+---
+
+<header class="bar">
+  <a class="bar__brand" href={home ? '#top' : '/'}>
+    <Logo size={20} />
+    <span>{nav.brand}</span>
+  </a>
+
+  <nav class="bar__nav" aria-label="Sections">
+    {
+      nav.links.map((l) => (
+        <a class="bar__item" href={href(l.href)} data-spy={home ? l.href.slice(1) : undefined}>
+          {l.label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="bar__end">
+    <span class="bar__clock" data-bar-clock aria-label={`Local time in ${nav.clock}`}>{nav.clock}</span>
+    <a class="bar__item bar__resume" href={nav.resume.href} target="_blank" rel="noopener">{nav.resume.label}</a>
+    <a class="bar__cta" href={nav.cta.href}>{nav.cta.label}</a>
+    <button class="bar__item bar__toggle" type="button" popovertarget="bar-menu" aria-label="Open the menu">
+      Menu
+    </button>
+  </div>
+
+  <div id="bar-menu" class="menu win" popover>
+    <div class="win__bar"><span>Menu</span><span aria-hidden="true">▪</span></div>
+    <nav class="win__body menu__body" aria-label="Menu">
+      {
+        nav.links.map((l) => (
+          <a class="menu__item" href={href(l.href)}>
+            {l.label}
+          </a>
+        ))
+      }
+      <a class="menu__item" href={nav.resume.href} target="_blank" rel="noopener">{nav.resume.label}</a>
+      <a class="win__btn menu__cta" href={nav.cta.href}>{nav.cta.label}</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  import { nav } from '../data/nav';
+  import { profile } from '../data/profile';
+
+  // the menu-bar clock, minute precision, in Casablanca time
+  const clock = document.querySelector<HTMLElement>('[data-bar-clock]');
+  if (clock) {
+    const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: profile.timezone, hour: '2-digit', minute: '2-digit' });
+    const tick = () => (clock.textContent = `${nav.clock} ${fmt.format(new Date())}`);
+    tick();
+    setInterval(tick, 15_000);
+  }
+
+  // close the mobile menu when one of its links is followed
+  const menu = document.getElementById('bar-menu');
+  menu?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) menu.hidePopover();
+  });
+
+  // highlight the section currently in the middle of the screen
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-spy]')];
+  const sections = links.map((a) => document.getElementById(a.dataset.spy!)).filter(Boolean) as HTMLElement[];
+  if (sections.length) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          links.forEach((a) => a.toggleAttribute('aria-current', a.dataset.spy === entry.target.id));
+        }
+      },
+      { rootMargin: '-45% 0px -54% 0px' },
+    );
+    sections.forEach((s) => io.observe(s));
+  }
+</script>
+
+<style>
+  .bar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    height: var(--bar-h);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: stretch;
+    background: var(--paper);
+    border-bottom: 1px solid var(--ink);
+    font: 22px/1 var(--font-pixel);
+  }
+  .bar__brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    text-decoration: none;
+    white-space: nowrap;
+    justify-self: start;
+  }
+  .bar__nav,
+  .bar__end {
+    display: flex;
+    align-items: stretch;
+  }
+  .bar__end {
+    justify-content: flex-end;
+  }
+  /* menu-bar items invert on hover and when active, with no transition, like a 1984 menu */
+  .bar__item {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    text-decoration: none;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .bar__item[aria-current] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bar__item:hover,
+    .bar__brand:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+  }
+  .bar__clock {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    border-left: 1px solid var(--ink);
+    border-right: 1px solid var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .bar__cta {
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    background: var(--blue);
+    color: var(--paper);
+    text-decoration: none;
+    border-left: 1px solid var(--ink);
+    transition: transform 160ms var(--ease-out);
+  }
+  .bar__cta:active,
+  .bar__item:active {
+    transform: scale(0.97);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .bar__cta:hover {
+      background: var(--ink);
+    }
+  }
+  .bar__toggle {
+    display: none;
+  }
+
+  /* the mobile menu: a window that drops from the toggle */
+  .menu.win {
+    position: fixed;
+    inset: auto;
+    top: calc(var(--bar-h) + 6px);
+    right: 8px;
+    margin: 0;
+    width: min(260px, calc(100vw - 16px));
+    padding: 0;
+    transform-origin: top right;
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+    /* closing is quicker than opening */
+    transition:
+      opacity 120ms ease,
+      transform 120ms var(--ease-out),
+      overlay 120ms allow-discrete,
+      display 120ms allow-discrete;
+  }
+  .menu.win:popover-open {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 180ms ease,
+      transform 200ms var(--ease-out),
+      overlay 200ms allow-discrete,
+      display 200ms allow-discrete;
+  }
+  @starting-style {
+    .menu.win:popover-open {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.97);
+    }
+  }
+  .menu__body {
+    display: grid;
+    padding: 4px;
+  }
+  .menu__item {
+    padding: 8px 8px 6px;
+    text-decoration: none;
+    font-size: 24px;
+  }
+  .menu__item:active {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .menu__cta {
+    margin-top: 6px;
+    text-align: center;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .menu.win,
+    .menu.win:popover-open {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 1080px) {
+    .bar__clock {
+      display: none;
+    }
+  }
+  @media (max-width: 900px) {
+    .bar {
+      grid-template-columns: 1fr auto;
+    }
+    .bar__nav,
+    .bar__resume {
+      display: none;
+    }
+    .bar__toggle {
+      display: flex;
+      border-left: 1px solid var(--ink);
+    }
+  }
+  @media (max-width: 420px) {
+    .bar__brand span {
+      font-size: 19px;
+    }
+    .bar__cta {
+      display: none;
+    }
+  }
+</style>
